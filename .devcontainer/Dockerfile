@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/vscode/devcontainers/dotnet:0.201.7-5.0
 
-# Instlal latest .NET Core 3.1
+# Install latest .NET Core 3.1
 RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
   sudo dpkg -i packages-microsoft-prod.deb && \
   sudo apt-get update && \
@@ -9,4 +9,5 @@ RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-p
   sudo apt-get install -y dotnet-sdk-3.1 && \
   # Install Clang 11 for the UnitTests
   sudo apt-get install clang-11 -y
+
 # Built with ❤ by [Pipeline Foundation](https://pipeline.foundation)
