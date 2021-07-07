@@ -7,7 +7,6 @@ RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-p
   sudo apt-get install -y apt-transport-https && \
   sudo apt-get update && \
   sudo apt-get install -y dotnet-sdk-3.1 && \
-  # Install libLLVM 11 for the UnitTests
-  sudo apt-get install libllvm11
-
+  # Install Clang 11 for the UnitTests
+  sudo apt-get install clang-11 -y
 # Built with ❤ by [Pipeline Foundation](https://pipeline.foundation)
