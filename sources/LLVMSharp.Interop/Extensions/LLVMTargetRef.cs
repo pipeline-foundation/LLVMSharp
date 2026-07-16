@@ -75,6 +75,32 @@ public unsafe partial struct LLVMTargetRef(IntPtr handle) : IEquatable<LLVMTarge
         }
     }
 
+    public readonly string Description
+    {
+        get
+        {
+            if (Handle == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+
+            var pDescription = LLVM.GetTargetDescription(this);
+
+            if (pDescription == null)
+            {
+                return string.Empty;
+            }
+
+            return SpanExtensions.AsString(pDescription);
+        }
+    }
+
+    public readonly bool HasAsmBackend => (Handle != IntPtr.Zero) && LLVM.TargetHasAsmBackend(this) != 0;
+
+    public readonly bool HasJIT => (Handle != IntPtr.Zero) && LLVM.TargetHasJIT(this) != 0;
+
+    public readonly bool HasTargetMachine => (Handle != IntPtr.Zero) && LLVM.TargetHasTargetMachine(this) != 0;
+
     public readonly string Name
     {
         get
@@ -119,6 +145,14 @@ public unsafe partial struct LLVMTargetRef(IntPtr handle) : IEquatable<LLVMTarge
         using var marshaledCPU = new MarshaledString(cpu);
         using var marshaledFeatures = new MarshaledString(features);
         return LLVM.CreateTargetMachine(this, marshaledTriple, marshaledCPU, marshaledFeatures, level, reloc, codeModel);
+    }
+
+    public readonly LLVMTargetMachineRef CreateTargetMachineWithOptions(string triple, LLVMTargetMachineOptionsRef options) => CreateTargetMachineWithOptions(triple.AsSpan(), options);
+
+    public readonly LLVMTargetMachineRef CreateTargetMachineWithOptions(ReadOnlySpan<char> triple, LLVMTargetMachineOptionsRef options)
+    {
+        using var marshaledTriple = new MarshaledString(triple);
+        return LLVM.CreateTargetMachineWithOptions(this, marshaledTriple, options);
     }
 
     public override readonly string ToString() => $"{nameof(LLVMTargetRef)}: {Handle:X}";
