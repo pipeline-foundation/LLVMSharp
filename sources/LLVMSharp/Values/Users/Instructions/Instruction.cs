@@ -1,5 +1,6 @@
 // Copyright (c) .NET Foundation and Contributors. All Rights Reserved. Licensed under the MIT License (MIT). See License.md in the repository root for more information.
 
+using System;
 using LLVMSharp.Interop;
 
 namespace LLVMSharp;
@@ -8,6 +9,42 @@ public partial class Instruction : User
 {
     private protected Instruction(LLVMValueRef handle) : base(handle.IsAInstruction, LLVMValueKind.LLVMInstructionValueKind)
     {
+    }
+
+    public LLVMFastMathFlags FastMathFlags
+    {
+        get
+        {
+            return Handle.FastMathFlags;
+        }
+
+        set
+        {
+            var handle = Handle;
+            handle.FastMathFlags = value;
+        }
+    }
+
+    public bool IsTerminator => Handle.IsATerminatorInst != null;
+
+    public LLVMOpcode Opcode => Handle.InstructionOpcode;
+
+    public BasicBlock Parent => Context.GetOrCreate(Handle.InstructionParent);
+
+    public uint SuccessorsCount => Handle.SuccessorsCount;
+
+    public Instruction Clone() => Context.GetOrCreate<Instruction>(Handle.InstructionClone);
+
+    public void EraseFromParent() => Handle.InstructionEraseFromParent();
+
+    public BasicBlock GetSuccessor(uint index) => Context.GetOrCreate(Handle.GetSuccessor(index));
+
+    public void RemoveFromParent() => Handle.InstructionRemoveFromParent();
+
+    public void SetSuccessor(uint index, BasicBlock block)
+    {
+        ArgumentNullException.ThrowIfNull(block);
+        Handle.SetSuccessor(index, block.Handle);
     }
 
     internal static new Instruction Create(LLVMValueRef handle) => handle switch
