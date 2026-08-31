@@ -8,6 +8,18 @@ namespace LLVMSharp.UnitTests;
 public class ManagedApi
 {
     [Test]
+    public unsafe void NativeVersion()
+    {
+        uint major;
+        uint minor;
+        uint patch;
+
+        LLVM.GetVersion(&major, &minor, &patch);
+
+        Assert.That((major, minor, patch), Is.EqualTo((22u, 1u, 8u)));
+    }
+
+    [Test]
     public void TypePredicates()
     {
         var context = new LLVMContext();
@@ -212,6 +224,7 @@ public class ManagedApi
         Assert.That(function.NumParams, Is.EqualTo(2u));
         Assert.That(function.ReturnType, Is.EqualTo(int32));
         Assert.That(function.FunctionType.NumParams, Is.EqualTo(2u));
+        Assert.That(function.Handle.FunctionType, Is.EqualTo(functionType));
         Assert.That(function.IntrinsicID, Is.EqualTo(0u));
 
         var parameter = function.GetParam(0);
@@ -387,6 +400,11 @@ public class ManagedApi
         switchInst.AddCase((ConstantInt)context.GetOrCreate(LLVMValueRef.CreateConstInt(int32.Handle, 1)), entry);
         Assert.That(switchInst.DefaultDest, Is.EqualTo(ifFalse));
         Assert.That(((ConstantInt)switchInst.Condition).ZExtValue, Is.EqualTo(0UL));
+        Assert.That(switchInst.SuccessorsCount, Is.EqualTo(2u));
+        Assert.That(switchInst.Handle.GetSwitchCaseValue(1).ConstIntZExt, Is.EqualTo(1UL));
+
+        switchInst.Handle.SetSwitchCaseValue(1, LLVMValueRef.CreateConstInt(int32.Handle, 2));
+        Assert.That(switchInst.Handle.GetSwitchCaseValue(1).ConstIntZExt, Is.EqualTo(2UL));
     }
 
     [Test]
@@ -602,9 +620,7 @@ public class ManagedApi
     [Test]
     public void TargetAndTargetMachineAccessors()
     {
-        LLVM.InitializeAllTargetInfos();
-        LLVM.InitializeAllTargets();
-        LLVM.InitializeAllTargetMCs();
+        _ = LLVM.InitializeNativeTarget();
 
         var triple = Target.DefaultTriple;
         Assert.That(triple, Is.Not.Empty);

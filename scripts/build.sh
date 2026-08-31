@@ -319,7 +319,7 @@ function DetectChanges {
     detectLibllvmsharp=true
   else
     # libLLVM regenerates when the tracked LLVM version changes. The libLLVM package
-    # version tracks the full patch (e.g. 21.1.8), so compare the full version.
+    # version tracks the full patch (e.g. 22.1.8), so compare the full version.
     prevVersion="$(git -C "$RepoRoot" show "$base:CMakeLists.txt" 2>/dev/null | sed -n 's/^project(LLVMSharp VERSION \([0-9.]*\)).*/\1/p')"
 
     if [ "$llvm" != "$prevVersion" ]; then

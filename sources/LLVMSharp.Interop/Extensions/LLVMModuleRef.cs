@@ -218,7 +218,9 @@ public unsafe partial struct LLVMModuleRef(IntPtr handle) : IDisposable, IEquata
     public static LLVMModuleRef CreateWithName(ReadOnlySpan<char> ModuleID)
     {
         using var marshaledModuleID = new MarshaledString(ModuleID);
+#pragma warning disable CS0618 // Global-context API retained for compatibility.
         return LLVM.ModuleCreateWithName(marshaledModuleID);
+#pragma warning restore CS0618
     }
 
     public readonly LLVMValueRef AddAlias2(LLVMTypeRef ValueTy, uint AddrSpace, LLVMValueRef Aliasee, string Name) => AddAlias2(ValueTy, AddrSpace, Aliasee, Name.AsSpan());

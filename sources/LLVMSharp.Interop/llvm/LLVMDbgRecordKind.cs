@@ -3,9 +3,12 @@
 // Ported from https://github.com/llvm/llvm-project/tree/llvmorg-22.1.8/llvm/include/llvm-c
 // Original source is Copyright (c) the LLVM Project and Contributors. Licensed under the Apache License v2.0 with LLVM Exceptions. See NOTICE.txt in the project root for license information.
 
-using System.Runtime.InteropServices;
-
 namespace LLVMSharp.Interop;
 
-[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-public unsafe delegate void lto_diagnostic_handler_t(lto_codegen_diagnostic_severity_t severity, [NativeTypeName("const char *")] sbyte* diag, void* ctxt);
+public enum LLVMDbgRecordKind
+{
+    LLVMDbgRecordLabel,
+    LLVMDbgRecordDeclare,
+    LLVMDbgRecordValue,
+    LLVMDbgRecordAssign,
+}

@@ -1,6 +1,6 @@
 // Copyright (c) .NET Foundation and Contributors. All Rights Reserved. Licensed under the MIT License (MIT). See License.md in the repository root for more information.
 
-// Ported from https://github.com/llvm/llvm-project/tree/llvmorg-21.1.8/llvm/include/llvm-c
+// Ported from https://github.com/llvm/llvm-project/tree/llvmorg-22.1.8/llvm/include/llvm-c
 // Original source is Copyright (c) the LLVM Project and Contributors. Licensed under the Apache License v2.0 with LLVM Exceptions. See NOTICE.txt in the project root for license information.
 
 using System;
@@ -26,10 +26,12 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMParseBitcode", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
+    [Obsolete("Use of the global context is deprecated, use LLVMParseBitcodeInContext2 instead")]
     public static extern int ParseBitcode([NativeTypeName("LLVMMemoryBufferRef")] LLVMOpaqueMemoryBuffer* MemBuf, [NativeTypeName("LLVMModuleRef *")] LLVMOpaqueModule** OutModule, [NativeTypeName("char **")] sbyte** OutMessage);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMParseBitcode2", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
+    [Obsolete("Use of the global context is deprecated, use LLVMParseBitcodeInContext2 instead")]
     public static extern int ParseBitcode2([NativeTypeName("LLVMMemoryBufferRef")] LLVMOpaqueMemoryBuffer* MemBuf, [NativeTypeName("LLVMModuleRef *")] LLVMOpaqueModule** OutModule);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMParseBitcodeInContext", ExactSpelling = true)]
@@ -50,10 +52,12 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetBitcodeModule", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
+    [Obsolete("Use of the global context is deprecated, use LLVMGetBitcodeModuleInContext2 instead")]
     public static extern int GetBitcodeModule([NativeTypeName("LLVMMemoryBufferRef")] LLVMOpaqueMemoryBuffer* MemBuf, [NativeTypeName("LLVMModuleRef *")] LLVMOpaqueModule** OutM, [NativeTypeName("char **")] sbyte** OutMessage);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetBitcodeModule2", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
+    [Obsolete("Use of the global context is deprecated, use LLVMGetBitcodeModuleInContext2 instead")]
     public static extern int GetBitcodeModule2([NativeTypeName("LLVMMemoryBufferRef")] LLVMOpaqueMemoryBuffer* MemBuf, [NativeTypeName("LLVMModuleRef *")] LLVMOpaqueModule** OutM);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMWriteBitcodeToFile", ExactSpelling = true)]
@@ -151,6 +155,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetGlobalContext", ExactSpelling = true)]
     [return: NativeTypeName("LLVMContextRef")]
+    [Obsolete("Use of the global context is deprecated, create one using LLVMContextCreate instead")]
     public static extern LLVMOpaqueContext* GetGlobalContext();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMContextSetDiagnosticHandler", ExactSpelling = true)]
@@ -189,6 +194,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetMDKindID", ExactSpelling = true)]
     [return: NativeTypeName("unsigned int")]
+    [Obsolete("Use of the global context is deprecated, use LLVMGetMDKindIDInContext instead")]
     public static extern uint GetMDKindID([NativeTypeName("const char *")] sbyte* Name, [NativeTypeName("unsigned int")] uint SLen);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetSyncScopeID", ExactSpelling = true)]
@@ -257,6 +263,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMModuleCreateWithName", ExactSpelling = true)]
     [return: NativeTypeName("LLVMModuleRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMModuleCreateWithNameInContext instead")]
     public static extern LLVMOpaqueModule* ModuleCreateWithName([NativeTypeName("const char *")] sbyte* ModuleID);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMModuleCreateWithNameInContext", ExactSpelling = true)]
@@ -451,6 +458,10 @@ public static unsafe partial class LLVM
     [return: NativeTypeName("LLVMValueRef")]
     public static extern LLVMOpaqueValue* AddFunction([NativeTypeName("LLVMModuleRef")] LLVMOpaqueModule* M, [NativeTypeName("const char *")] sbyte* Name, [NativeTypeName("LLVMTypeRef")] LLVMOpaqueType* FunctionTy);
 
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetOrInsertFunction", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMValueRef")]
+    public static extern LLVMOpaqueValue* GetOrInsertFunction([NativeTypeName("LLVMModuleRef")] LLVMOpaqueModule* M, [NativeTypeName("const char *")] sbyte* Name, [NativeTypeName("size_t")] nuint NameLen, [NativeTypeName("LLVMTypeRef")] LLVMOpaqueType* FunctionTy);
+
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetNamedFunction", ExactSpelling = true)]
     [return: NativeTypeName("LLVMValueRef")]
     public static extern LLVMOpaqueValue* GetNamedFunction([NativeTypeName("LLVMModuleRef")] LLVMOpaqueModule* M, [NativeTypeName("const char *")] sbyte* Name);
@@ -526,30 +537,37 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInt1Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInt1TypeInContext instead")]
     public static extern LLVMOpaqueType* Int1Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInt8Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInt8TypeInContext instead")]
     public static extern LLVMOpaqueType* Int8Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInt16Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInt16TypeInContext instead")]
     public static extern LLVMOpaqueType* Int16Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInt32Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInt32TypeInContext instead")]
     public static extern LLVMOpaqueType* Int32Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInt64Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInt64TypeInContext instead")]
     public static extern LLVMOpaqueType* Int64Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInt128Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInt128TypeInContext instead")]
     public static extern LLVMOpaqueType* Int128Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMIntType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMIntTypeInContext instead")]
     public static extern LLVMOpaqueType* IntType([NativeTypeName("unsigned int")] uint NumBits);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetIntTypeWidth", ExactSpelling = true)]
@@ -586,30 +604,37 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMHalfType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMHalfTypeInContext instead")]
     public static extern LLVMOpaqueType* HalfType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMBFloatType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMBFloatTypeInContext instead")]
     public static extern LLVMOpaqueType* BFloatType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMFloatType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMFloatTypeInContext instead")]
     public static extern LLVMOpaqueType* FloatType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDoubleType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMDoubleTypeInContext instead")]
     public static extern LLVMOpaqueType* DoubleType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMX86FP80Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMX86FP80TypeInContext instead")]
     public static extern LLVMOpaqueType* X86FP80Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMFP128Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMFP128TypeInContext instead")]
     public static extern LLVMOpaqueType* FP128Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMPPCFP128Type", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMPPCFP128TypeInContext instead")]
     public static extern LLVMOpaqueType* PPCFP128Type();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMFunctionType", ExactSpelling = true)]
@@ -637,6 +662,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMStructType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMStructTypeInContext instead")]
     public static extern LLVMOpaqueType* StructType([NativeTypeName("LLVMTypeRef *")] LLVMOpaqueType** ElementTypes, [NativeTypeName("unsigned int")] uint ElementCount, [NativeTypeName("LLVMBool")] int Packed);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMStructCreateNamed", ExactSpelling = true)]
@@ -766,14 +792,17 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMVoidType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMVoidTypeInContext instead")]
     public static extern LLVMOpaqueType* VoidType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMLabelType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMLabelTypeInContext instead")]
     public static extern LLVMOpaqueType* LabelType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMX86AMXType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMX86AMXTypeInContext instead")]
     public static extern LLVMOpaqueType* X86AMXType();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMTargetExtTypeInContext", ExactSpelling = true)]
@@ -1301,6 +1330,10 @@ public static unsafe partial class LLVM
     [return: NativeTypeName("LLVMValueRef")]
     public static extern LLVMOpaqueValue* ConstRealOfStringAndSize([NativeTypeName("LLVMTypeRef")] LLVMOpaqueType* RealTy, [NativeTypeName("const char *")] sbyte* Text, [NativeTypeName("unsigned int")] uint SLen);
 
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMConstFPFromBits", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMValueRef")]
+    public static extern LLVMOpaqueValue* ConstFPFromBits([NativeTypeName("LLVMTypeRef")] LLVMOpaqueType* Ty, [NativeTypeName("const uint64_t[]")] ulong* N);
+
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMConstIntGetZExtValue", ExactSpelling = true)]
     [return: NativeTypeName("unsigned long long")]
     public static extern ulong ConstIntGetZExtValue([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* ConstantVal);
@@ -1322,6 +1355,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMConstString", ExactSpelling = true)]
     [return: NativeTypeName("LLVMValueRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMConstStringInContext2 instead")]
     public static extern LLVMOpaqueValue* ConstString([NativeTypeName("const char *")] sbyte* Str, [NativeTypeName("unsigned int")] uint Length, [NativeTypeName("LLVMBool")] int DontNullTerminate);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMIsConstantString", ExactSpelling = true)]
@@ -1342,6 +1376,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMConstStruct", ExactSpelling = true)]
     [return: NativeTypeName("LLVMValueRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMConstStructInContext instead")]
     public static extern LLVMOpaqueValue* ConstStruct([NativeTypeName("LLVMValueRef *")] LLVMOpaqueValue** ConstantVals, [NativeTypeName("unsigned int")] uint Count, [NativeTypeName("LLVMBool")] int Packed);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMConstArray", ExactSpelling = true)]
@@ -1561,11 +1596,17 @@ public static unsafe partial class LLVM
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGlobalSetMetadata", ExactSpelling = true)]
     public static extern void GlobalSetMetadata([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Global, [NativeTypeName("unsigned int")] uint Kind, [NativeTypeName("LLVMMetadataRef")] LLVMOpaqueMetadata* MD);
 
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGlobalAddMetadata", ExactSpelling = true)]
+    public static extern void GlobalAddMetadata([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Global, [NativeTypeName("unsigned int")] uint Kind, [NativeTypeName("LLVMMetadataRef")] LLVMOpaqueMetadata* MD);
+
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGlobalEraseMetadata", ExactSpelling = true)]
     public static extern void GlobalEraseMetadata([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Global, [NativeTypeName("unsigned int")] uint Kind);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGlobalClearMetadata", ExactSpelling = true)]
     public static extern void GlobalClearMetadata([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Global);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGlobalAddDebugInfo", ExactSpelling = true)]
+    public static extern void GlobalAddDebugInfo([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Global, [NativeTypeName("LLVMMetadataRef")] LLVMOpaqueMetadata* GVE);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGlobalCopyAllMetadata", ExactSpelling = true)]
     public static extern LLVMValueMetadataEntry* GlobalCopyAllMetadata([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Value, [NativeTypeName("size_t *")] nuint* NumEntries);
@@ -1897,6 +1938,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMMDString", ExactSpelling = true)]
     [return: NativeTypeName("LLVMValueRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMMDStringInContext2 instead")]
     public static extern LLVMOpaqueValue* MDString([NativeTypeName("const char *")] sbyte* Str, [NativeTypeName("unsigned int")] uint SLen);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMMDNodeInContext", ExactSpelling = true)]
@@ -1905,6 +1947,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMMDNode", ExactSpelling = true)]
     [return: NativeTypeName("LLVMValueRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMMDNodeInContext2 instead")]
     public static extern LLVMOpaqueValue* MDNode([NativeTypeName("LLVMValueRef *")] LLVMOpaqueValue** Vals, [NativeTypeName("unsigned int")] uint Count);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMCreateOperandBundle", ExactSpelling = true)]
@@ -1993,6 +2036,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMAppendBasicBlock", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBasicBlockRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMAppendBasicBlockInContext instead")]
     public static extern LLVMOpaqueBasicBlock* AppendBasicBlock([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Fn, [NativeTypeName("const char *")] sbyte* Name);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInsertBasicBlockInContext", ExactSpelling = true)]
@@ -2001,6 +2045,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMInsertBasicBlock", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBasicBlockRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMInsertBasicBlockInContext instead")]
     public static extern LLVMOpaqueBasicBlock* InsertBasicBlock([NativeTypeName("LLVMBasicBlockRef")] LLVMOpaqueBasicBlock* InsertBeforeBB, [NativeTypeName("const char *")] sbyte* Name);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDeleteBasicBlock", ExactSpelling = true)]
@@ -2096,6 +2141,25 @@ public static unsafe partial class LLVM
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetPreviousDbgRecord", ExactSpelling = true)]
     [return: NativeTypeName("LLVMDbgRecordRef")]
     public static extern LLVMOpaqueDbgRecord* GetPreviousDbgRecord([NativeTypeName("LLVMDbgRecordRef")] LLVMOpaqueDbgRecord* DbgRecord);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDbgRecordGetDebugLoc", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMMetadataRef")]
+    public static extern LLVMOpaqueMetadata* DbgRecordGetDebugLoc([NativeTypeName("LLVMDbgRecordRef")] LLVMOpaqueDbgRecord* Rec);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDbgRecordGetKind", ExactSpelling = true)]
+    public static extern LLVMDbgRecordKind DbgRecordGetKind([NativeTypeName("LLVMDbgRecordRef")] LLVMOpaqueDbgRecord* Rec);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDbgVariableRecordGetValue", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMValueRef")]
+    public static extern LLVMOpaqueValue* DbgVariableRecordGetValue([NativeTypeName("LLVMDbgRecordRef")] LLVMOpaqueDbgRecord* Rec, [NativeTypeName("unsigned int")] uint OpIdx);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDbgVariableRecordGetVariable", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMMetadataRef")]
+    public static extern LLVMOpaqueMetadata* DbgVariableRecordGetVariable([NativeTypeName("LLVMDbgRecordRef")] LLVMOpaqueDbgRecord* Rec);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDbgVariableRecordGetExpression", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMMetadataRef")]
+    public static extern LLVMOpaqueMetadata* DbgVariableRecordGetExpression([NativeTypeName("LLVMDbgRecordRef")] LLVMOpaqueDbgRecord* Rec);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetNumArgOperands", ExactSpelling = true)]
     [return: NativeTypeName("unsigned int")]
@@ -2216,6 +2280,13 @@ public static unsafe partial class LLVM
     [return: NativeTypeName("LLVMBasicBlockRef")]
     public static extern LLVMOpaqueBasicBlock* GetSwitchDefaultDest([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* SwitchInstr);
 
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetSwitchCaseValue", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMValueRef")]
+    public static extern LLVMOpaqueValue* GetSwitchCaseValue([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* SwitchInstr, [NativeTypeName("unsigned int")] uint i);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMSetSwitchCaseValue", ExactSpelling = true)]
+    public static extern void SetSwitchCaseValue([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* SwitchInstr, [NativeTypeName("unsigned int")] uint i, [NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* CaseValue);
+
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetAllocatedType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
     public static extern LLVMOpaqueType* GetAllocatedType([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Alloca);
@@ -2267,6 +2338,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMCreateBuilder", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBuilderRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMCreateBuilderInContext instead")]
     public static extern LLVMOpaqueBuilder* CreateBuilder();
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMPositionBuilder", ExactSpelling = true)]
@@ -2692,7 +2764,7 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMGetVolatile", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
-    public static extern int GetVolatile([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* MemoryAccessInst);
+    public static extern int GetVolatile([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* Inst);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMSetVolatile", ExactSpelling = true)]
     public static extern void SetVolatile([NativeTypeName("LLVMValueRef")] LLVMOpaqueValue* MemoryAccessInst, [NativeTypeName("LLVMBool")] int IsVolatile);
@@ -3043,6 +3115,10 @@ public static unsafe partial class LLVM
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDIBuilderCreateFile", ExactSpelling = true)]
     [return: NativeTypeName("LLVMMetadataRef")]
     public static extern LLVMOpaqueMetadata* DIBuilderCreateFile([NativeTypeName("LLVMDIBuilderRef")] LLVMOpaqueDIBuilder* Builder, [NativeTypeName("const char *")] sbyte* Filename, [NativeTypeName("size_t")] nuint FilenameLen, [NativeTypeName("const char *")] sbyte* Directory, [NativeTypeName("size_t")] nuint DirectoryLen);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDIBuilderCreateFileWithChecksum", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMMetadataRef")]
+    public static extern LLVMOpaqueMetadata* DIBuilderCreateFileWithChecksum([NativeTypeName("LLVMDIBuilderRef")] LLVMOpaqueDIBuilder* Builder, [NativeTypeName("const char *")] sbyte* Filename, [NativeTypeName("size_t")] nuint FilenameLen, [NativeTypeName("const char *")] sbyte* Directory, [NativeTypeName("size_t")] nuint DirectoryLen, LLVMChecksumKind ChecksumKind, [NativeTypeName("const char *")] sbyte* Checksum, [NativeTypeName("size_t")] nuint ChecksumLen, [NativeTypeName("const char *")] sbyte* Source, [NativeTypeName("size_t")] nuint SourceLen);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMDIBuilderCreateModule", ExactSpelling = true)]
     [return: NativeTypeName("LLVMMetadataRef")]
@@ -3687,6 +3763,10 @@ public static unsafe partial class LLVM
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMParseIRInContext", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
     public static extern int ParseIRInContext([NativeTypeName("LLVMContextRef")] LLVMOpaqueContext* ContextRef, [NativeTypeName("LLVMMemoryBufferRef")] LLVMOpaqueMemoryBuffer* MemBuf, [NativeTypeName("LLVMModuleRef *")] LLVMOpaqueModule** OutM, [NativeTypeName("char **")] sbyte** OutMessage);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMParseIRInContext2", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMBool")]
+    public static extern int ParseIRInContext2([NativeTypeName("LLVMContextRef")] LLVMOpaqueContext* ContextRef, [NativeTypeName("LLVMMemoryBufferRef")] LLVMOpaqueMemoryBuffer* MemBuf, [NativeTypeName("LLVMModuleRef *")] LLVMOpaqueModule** OutM, [NativeTypeName("char **")] sbyte** OutMessage);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMLinkModules2", ExactSpelling = true)]
     [return: NativeTypeName("LLVMBool")]
@@ -4439,9 +4519,17 @@ public static unsafe partial class LLVM
     [return: NativeTypeName("LLVMErrorRef")]
     public static extern LLVMOpaqueError* OrcDumpObjects_CallOperator([NativeTypeName("LLVMOrcDumpObjectsRef")] LLVMOrcOpaqueDumpObjects* DumpObjects, [NativeTypeName("LLVMMemoryBufferRef *")] LLVMOpaqueMemoryBuffer** ObjBuffer);
 
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMOrcCreateObjectLinkingLayerWithInProcessMemoryManager", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMErrorRef")]
+    public static extern LLVMOpaqueError* OrcCreateObjectLinkingLayerWithInProcessMemoryManager([NativeTypeName("LLVMOrcObjectLayerRef *")] LLVMOrcOpaqueObjectLayer** Result, [NativeTypeName("LLVMOrcExecutionSessionRef")] LLVMOrcOpaqueExecutionSession* ES);
+
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager", ExactSpelling = true)]
     [return: NativeTypeName("LLVMOrcObjectLayerRef")]
     public static extern LLVMOrcOpaqueObjectLayer* OrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager([NativeTypeName("LLVMOrcExecutionSessionRef")] LLVMOrcOpaqueExecutionSession* ES);
+
+    [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManagerReserveAlloc", ExactSpelling = true)]
+    [return: NativeTypeName("LLVMOrcObjectLayerRef")]
+    public static extern LLVMOrcOpaqueObjectLayer* OrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManagerReserveAlloc([NativeTypeName("LLVMOrcExecutionSessionRef")] LLVMOrcOpaqueExecutionSession* ES, [NativeTypeName("LLVMBool")] int ReserveAlloc);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMOrcCreateRTDyldObjectLinkingLayerWithMCJITMemoryManagerLikeCallbacks", ExactSpelling = true)]
     [return: NativeTypeName("LLVMOrcObjectLayerRef")]
@@ -4738,10 +4826,12 @@ public static unsafe partial class LLVM
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMIntPtrType", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMIntPtrTypeInContext instead")]
     public static extern LLVMOpaqueType* IntPtrType([NativeTypeName("LLVMTargetDataRef")] LLVMOpaqueTargetData* TD);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMIntPtrTypeForAS", ExactSpelling = true)]
     [return: NativeTypeName("LLVMTypeRef")]
+    [Obsolete("Use of the global context is deprecated, use LLVMIntPtrTypeForASInContext instead")]
     public static extern LLVMOpaqueType* IntPtrTypeForAS([NativeTypeName("LLVMTargetDataRef")] LLVMOpaqueTargetData* TD, [NativeTypeName("unsigned int")] uint AS);
 
     [DllImport("libLLVM", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LLVMIntPtrTypeInContext", ExactSpelling = true)]
