@@ -190,11 +190,11 @@ jobs:
 
   sign-nuget:
     needs: [ libllvm-pack, libllvmsharp-pack ]
-    # Sign on pushes to main whenever the legs that actually ran succeeded. A leg that
-    # was version-gated out is 'skipped' (not a failure), so a libLLVMSharp-only
+    # Sign outside pull requests whenever the legs that actually ran succeeded. A leg
+    # that was version-gated out is 'skipped' (not a failure), so a libLLVMSharp-only
     # regeneration still gets signed; a real failure or cancellation blocks signing.
     if: >-
-      ${{ github.event_name == 'push'
+      ${{ github.event_name != 'pull_request'
           && !cancelled()
           && needs.libllvm-pack.result != 'failure'
           && needs.libllvmsharp-pack.result != 'failure'
