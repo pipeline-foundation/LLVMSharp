@@ -23,9 +23,36 @@ find_package(Clang REQUIRED CONFIG
              PATHS ${LLVM_SEARCH_PATHS}
              NO_DEFAULT_PATH)
 
+# LLVM's Windows packages record the DIA SDK path from their build machine.
+if(MSVC AND CMAKE_GENERATOR_INSTANCE AND TARGET LLVMDebugInfoPDB)
+  if(CMAKE_GENERATOR_PLATFORM MATCHES "[Aa][Rr][Mm]64")
+    set(_llvmsharp_diaguids "${CMAKE_GENERATOR_INSTANCE}/DIA SDK/lib/arm64/diaguids.lib")
+  elseif(CMAKE_GENERATOR_PLATFORM MATCHES "[Ww]in32")
+    set(_llvmsharp_diaguids "${CMAKE_GENERATOR_INSTANCE}/DIA SDK/lib/diaguids.lib")
+  else()
+    set(_llvmsharp_diaguids "${CMAKE_GENERATOR_INSTANCE}/DIA SDK/lib/amd64/diaguids.lib")
+  endif()
+
+  get_target_property(_llvmsharp_pdb_libs LLVMDebugInfoPDB INTERFACE_LINK_LIBRARIES)
+  if(EXISTS "${_llvmsharp_diaguids}")
+    string(REGEX REPLACE "[^;]*[Dd][Ii][Aa] SDK[^;]*diaguids\\.lib" "${_llvmsharp_diaguids}" _llvmsharp_pdb_libs "${_llvmsharp_pdb_libs}")
+    set_target_properties(LLVMDebugInfoPDB PROPERTIES INTERFACE_LINK_LIBRARIES "${_llvmsharp_pdb_libs}")
+  endif()
+endif()
+
+# Distro static zstd libraries are not position-independent.
+if(UNIX AND TARGET zstd::libzstd_static)
+  find_library(LLVMSHARP_ZSTD_SHARED NAMES zstd libzstd)
+  if(LLVMSHARP_ZSTD_SHARED)
+    set_target_properties(zstd::libzstd_static PROPERTIES IMPORTED_LOCATION "${LLVMSHARP_ZSTD_SHARED}")
+  endif()
+endif()
+
 add_library(LLVMSharp SHARED ${SOURCES})
 
-target_link_libraries(LLVMSharp PRIVATE LLVM-C)
+if(WIN32)
+  target_link_libraries(LLVMSharp PRIVATE LLVM-C)
+endif()
 
 target_link_libraries(LLVMSharp PRIVATE LLVMDemangle)
 
@@ -41,6 +68,10 @@ target_link_libraries(LLVMSharp PRIVATE LLVMOrcJIT)
 target_link_libraries(LLVMSharp PRIVATE LLVMScalarOpts)
 target_link_libraries(LLVMSharp PRIVATE LLVMTransformUtils)
 target_link_libraries(LLVMSharp PRIVATE LLVMVectorize)
+
+if(APPLE AND EXISTS "${PATH_TO_LLVM}/lib/libLTO.dylib")
+  target_link_options(LLVMSharp PRIVATE "LINKER:-lto_library,${PATH_TO_LLVM}/lib/libLTO.dylib")
+endif()
 
 target_include_directories(LLVMSharp PRIVATE ${LLVM_INCLUDE_DIRS})
 

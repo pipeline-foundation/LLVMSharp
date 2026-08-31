@@ -465,7 +465,18 @@ function BuildLibLLVMSharp {
 
   nativeBuildDir="$ArtifactsDir/bin/native/$runtime"
 
-  cmake -B "$nativeBuildDir" -S "$RepoRoot" -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM="$source"
+  case "$runtime" in
+    linux-*)
+      cmake -B "$nativeBuildDir" -S "$RepoRoot" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_CXX_COMPILER="$source/bin/clang++" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld" \
+        -DPATH_TO_LLVM="$source"
+      ;;
+    *)
+      cmake -B "$nativeBuildDir" -S "$RepoRoot" -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM="$source"
+      ;;
+  esac
   LASTEXITCODE=$?
 
   if [ "$LASTEXITCODE" != 0 ]; then
@@ -641,7 +652,7 @@ if $regeneratenative; then
   RegenerateNative
 
   if [ "$LASTEXITCODE" != 0 ]; then
-    return "$LASTEXITCODE"
+    exit "$LASTEXITCODE"
   fi
 fi
 
