@@ -50,6 +50,14 @@ endif()
 
 add_library(LLVMSharp SHARED ${SOURCES})
 
+if(NOT LLVM_ENABLE_RTTI)
+  if(MSVC)
+    target_compile_options(LLVMSharp PRIVATE /GR-)
+  else()
+    target_compile_options(LLVMSharp PRIVATE -fno-rtti)
+  endif()
+endif()
+
 if(WIN32)
   target_link_libraries(LLVMSharp PRIVATE LLVM-C)
 endif()
