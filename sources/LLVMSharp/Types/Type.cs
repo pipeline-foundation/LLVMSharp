@@ -61,6 +61,8 @@ public class Type : IEquatable<Type>
 
     public bool IsStructTy => Handle.Kind == LLVMTypeKind.LLVMStructTypeKind;
 
+    public bool IsTargetExtTy => Handle.Kind == LLVMTypeKind.LLVMTargetExtTypeKind;
+
     public bool IsTokenTy => Handle.Kind == LLVMTypeKind.LLVMTokenTypeKind;
 
     public bool IsVectorTy => Handle.Kind is LLVMTypeKind.LLVMVectorTypeKind or LLVMTypeKind.LLVMScalableVectorTypeKind;
@@ -105,6 +107,28 @@ public class Type : IEquatable<Type>
         ArgumentNullException.ThrowIfNull(c);
         var handle = c.Handle.HalfType;
         return c.GetOrCreate(handle);
+    }
+
+    public static Type? GetPrimitiveType(LLVMContext c, LLVMTypeKind kind)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+
+        return kind switch
+        {
+            LLVMTypeKind.LLVMVoidTypeKind => GetVoidTy(c),
+            LLVMTypeKind.LLVMHalfTypeKind => GetHalfTy(c),
+            LLVMTypeKind.LLVMBFloatTypeKind => GetBFloatTy(c),
+            LLVMTypeKind.LLVMFloatTypeKind => GetFloatTy(c),
+            LLVMTypeKind.LLVMDoubleTypeKind => GetDoubleTy(c),
+            LLVMTypeKind.LLVMX86_FP80TypeKind => GetX86_FP80Ty(c),
+            LLVMTypeKind.LLVMFP128TypeKind => GetFP128Ty(c),
+            LLVMTypeKind.LLVMPPC_FP128TypeKind => GetPPC_FP128Ty(c),
+            LLVMTypeKind.LLVMLabelTypeKind => GetLabelTy(c),
+            LLVMTypeKind.LLVMMetadataTypeKind => GetMetadataTy(c),
+            LLVMTypeKind.LLVMX86_AMXTypeKind => GetX86_AMXTy(c),
+            LLVMTypeKind.LLVMTokenTypeKind => GetTokenTy(c),
+            _ => null,
+        };
     }
 
     public static IntegerType GetInt1Ty(LLVMContext c)
@@ -170,6 +194,13 @@ public class Type : IEquatable<Type>
         return c.GetOrCreate(handle);
     }
 
+    public static Type GetMetadataTy(LLVMContext c)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var handle = c.Handle.MetadataType;
+        return c.GetOrCreate(handle);
+    }
+
     public static Type GetPPC_FP128Ty(LLVMContext c)
     {
         ArgumentNullException.ThrowIfNull(c);
@@ -177,10 +208,28 @@ public class Type : IEquatable<Type>
         return c.GetOrCreate(handle);
     }
 
+    public static Type GetTokenTy(LLVMContext c)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var handle = c.Handle.TokenType;
+        return c.GetOrCreate(handle);
+    }
+
     public static Type GetVoidTy(LLVMContext c)
     {
         ArgumentNullException.ThrowIfNull(c);
         var handle = c.Handle.VoidType;
+        return c.GetOrCreate(handle);
+    }
+
+    public static PointerType GetWasm_ExternrefTy(LLVMContext c) => PointerType.Get(c, 10);
+
+    public static PointerType GetWasm_FuncrefTy(LLVMContext c) => PointerType.Get(c, 20);
+
+    public static Type GetX86_AMXTy(LLVMContext c)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var handle = c.Handle.X86AMXType;
         return c.GetOrCreate(handle);
     }
 
@@ -224,7 +273,27 @@ public class Type : IEquatable<Type>
         LLVMTypeKind.LLVMScalableVectorTypeKind => new VectorType(handle),
         LLVMTypeKind.LLVMBFloatTypeKind => new Type(handle, LLVMTypeKind.LLVMBFloatTypeKind),
         LLVMTypeKind.LLVMX86_AMXTypeKind => new Type(handle, LLVMTypeKind.LLVMX86_AMXTypeKind),
-        LLVMTypeKind.LLVMTargetExtTypeKind => new Type(handle, LLVMTypeKind.LLVMTargetExtTypeKind),
+        LLVMTypeKind.LLVMTargetExtTypeKind => new TargetExtType(handle),
         _ => new Type(handle, handle.Kind),
     };
+
+    internal static LLVMTypeRef[] GetHandles(ReadOnlySpan<Type> types, LLVMContext context, string paramName)
+    {
+        var handles = new LLVMTypeRef[types.Length];
+
+        for (var i = 0; i < handles.Length; i++)
+        {
+            var type = types[i];
+            ArgumentNullException.ThrowIfNull(type, paramName);
+
+            if (type.Context != context)
+            {
+                throw new ArgumentException("All types must belong to the same context.", paramName);
+            }
+
+            handles[i] = type.Handle;
+        }
+
+        return handles;
+    }
 }
