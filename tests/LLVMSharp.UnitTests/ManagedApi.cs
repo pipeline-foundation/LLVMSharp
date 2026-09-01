@@ -34,10 +34,34 @@ public class ManagedApi
         Assert.That(int32.Context, Is.EqualTo(context));
         Assert.That(((IntegerType)int32).BitWidth, Is.EqualTo(32u));
 
+        var int128 = Type.GetInt128Ty(context);
+        Assert.That(int128.BitWidth, Is.EqualTo(128u));
+        Assert.That(Type.GetIntNTy(context, 128), Is.SameAs(int128));
+        Assert.That(Type.GetIntNTy(context, 256).BitWidth, Is.EqualTo(256u));
+
         var flt = Type.GetFloatTy(context);
         Assert.That(flt.IsFloatingPointTy, Is.True);
         Assert.That(flt.IsFloatTy, Is.True);
         Assert.That(flt.IsIntegerTy, Is.False);
+
+        var metadata = Type.GetMetadataTy(context);
+        Assert.That(metadata.IsMetadataTy, Is.True);
+        Assert.That(metadata.Context, Is.SameAs(context));
+        Assert.That(Type.GetPrimitiveType(context, LLVMTypeKind.LLVMMetadataTypeKind), Is.SameAs(metadata));
+
+        var token = Type.GetTokenTy(context);
+        Assert.That(token.IsTokenTy, Is.True);
+        Assert.That(token.Context, Is.SameAs(context));
+        Assert.That(Type.GetPrimitiveType(context, LLVMTypeKind.LLVMTokenTypeKind), Is.SameAs(token));
+
+        var x86AMX = Type.GetX86_AMXTy(context);
+        Assert.That(x86AMX.IsX86AMXTy, Is.True);
+        Assert.That(x86AMX.Context, Is.SameAs(context));
+        Assert.That(Type.GetPrimitiveType(context, LLVMTypeKind.LLVMX86_AMXTypeKind), Is.SameAs(x86AMX));
+        Assert.That(Type.GetPrimitiveType(context, LLVMTypeKind.LLVMIntegerTypeKind), Is.Null);
+
+        Assert.That(Type.GetWasm_ExternrefTy(context).AddressSpace, Is.EqualTo(10u));
+        Assert.That(Type.GetWasm_FuncrefTy(context).AddressSpace, Is.EqualTo(20u));
     }
 
     [Test]
@@ -46,18 +70,24 @@ public class ManagedApi
         var context = new LLVMContext();
         var int32 = Type.GetInt32Ty(context);
 
-        var vector = (VectorType)context.GetOrCreate(LLVMTypeRef.CreateVector(int32.Handle, 4));
+        var vector = VectorType.Get(int32, 4);
         Assert.That(vector.IsVectorTy, Is.True);
+        Assert.That(vector.IsScalable, Is.False);
         Assert.That(vector.NumElements, Is.EqualTo(4u));
         Assert.That(vector.ElementType, Is.EqualTo(int32));
         Assert.That(vector.ScalarType, Is.EqualTo(int32));
 
-        var array = (ArrayType)context.GetOrCreate(LLVMTypeRef.CreateArray(int32.Handle, 8));
+        var scalableVector = VectorType.Get(int32, 4, scalable: true);
+        Assert.That(scalableVector.IsVectorTy, Is.True);
+        Assert.That(scalableVector.IsScalable, Is.True);
+        Assert.That(scalableVector.NumElements, Is.EqualTo(4u));
+
+        var array = ArrayType.Get(int32, 8);
         Assert.That(array.IsArrayTy, Is.True);
         Assert.That(array.NumElements, Is.EqualTo(8ul));
         Assert.That(array.ElementType, Is.EqualTo(int32));
 
-        var pointer = (PointerType)context.GetOrCreate(LLVMTypeRef.CreatePointer(int32.Handle, 1));
+        var pointer = PointerType.Get(context, 1);
         Assert.That(pointer.IsPointerTy, Is.True);
         Assert.That(pointer.AddressSpace, Is.EqualTo(1u));
     }
@@ -69,8 +99,7 @@ public class ManagedApi
         var int32 = Type.GetInt32Ty(context);
         var flt = Type.GetFloatTy(context);
 
-        var handle = LLVMTypeRef.CreateFunction(int32.Handle, [int32.Handle, flt.Handle], IsVarArg: false);
-        var functionType = (FunctionType)context.GetOrCreate(handle);
+        var functionType = FunctionType.Get(int32, [int32, flt]);
 
         Assert.That(functionType.IsFunctionTy, Is.True);
         Assert.That(functionType.ReturnType, Is.EqualTo(int32));
@@ -81,6 +110,26 @@ public class ManagedApi
         Assert.That(parameters.Length, Is.EqualTo(2));
         Assert.That(parameters[0], Is.EqualTo(int32));
         Assert.That(parameters[1], Is.EqualTo(flt));
+    }
+
+    [Test]
+    public void TargetExtensionTypeAccessors()
+    {
+        var context = new LLVMContext();
+        var int32 = Type.GetInt32Ty(context);
+
+        var targetExtType = TargetExtType.Get(context, "llvmsharp.test", [int32], [42]);
+
+        Assert.That(targetExtType.IsTargetExtTy, Is.True);
+        Assert.That(targetExtType.Name, Is.EqualTo("llvmsharp.test"));
+        Assert.That(targetExtType.NumTypeParameters, Is.EqualTo(1u));
+        Assert.That(targetExtType.NumIntParameters, Is.EqualTo(1u));
+        Assert.That(targetExtType.GetTypeParameter(0), Is.SameAs(int32));
+        Assert.That(targetExtType.GetTypeParameters(), Is.EqualTo(new Type[] { int32 }));
+        Assert.That(targetExtType.GetIntParameter(0), Is.EqualTo(42u));
+        Assert.That(targetExtType.GetIntParameters(), Is.EqualTo(new uint[] { 42 }));
+        Assert.That(targetExtType.Context, Is.SameAs(context));
+        Assert.That(TargetExtType.Get(context, "llvmsharp.test", [int32], [42]), Is.SameAs(targetExtType));
     }
 
     [Test]
@@ -104,6 +153,11 @@ public class ManagedApi
         var elementTypes = structType.GetElementTypes();
         Assert.That(elementTypes.Length, Is.EqualTo(2));
         Assert.That(elementTypes[0], Is.EqualTo(int32));
+
+        var literalStructType = StructType.Get(context, [int32, flt], packed: true);
+        Assert.That(literalStructType.IsPacked, Is.True);
+        Assert.That(literalStructType.GetElementTypes(), Is.EqualTo(new Type[] { int32, flt }));
+        Assert.That(StructType.Get(context, [int32, flt], packed: true), Is.SameAs(literalStructType));
     }
 
     [Test]
