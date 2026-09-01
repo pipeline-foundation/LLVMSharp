@@ -142,6 +142,20 @@ public class Type : IEquatable<Type>
         return c.GetOrCreate<IntegerType>(handle);
     }
 
+    public static IntegerType GetInt128Ty(LLVMContext c)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var handle = c.Handle.Int128Type;
+        return c.GetOrCreate<IntegerType>(handle);
+    }
+
+    public static IntegerType GetIntNTy(LLVMContext c, uint n)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var handle = c.Handle.GetIntType(n);
+        return c.GetOrCreate<IntegerType>(handle);
+    }
+
     public static Type GetFP128Ty(LLVMContext c)
     {
         ArgumentNullException.ThrowIfNull(c);

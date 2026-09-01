@@ -34,6 +34,11 @@ public class ManagedApi
         Assert.That(int32.Context, Is.EqualTo(context));
         Assert.That(((IntegerType)int32).BitWidth, Is.EqualTo(32u));
 
+        var int128 = Type.GetInt128Ty(context);
+        Assert.That(int128.BitWidth, Is.EqualTo(128u));
+        Assert.That(Type.GetIntNTy(context, 128), Is.SameAs(int128));
+        Assert.That(Type.GetIntNTy(context, 256).BitWidth, Is.EqualTo(256u));
+
         var flt = Type.GetFloatTy(context);
         Assert.That(flt.IsFloatingPointTy, Is.True);
         Assert.That(flt.IsFloatTy, Is.True);
