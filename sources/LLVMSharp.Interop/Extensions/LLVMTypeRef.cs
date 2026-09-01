@@ -9,6 +9,7 @@ public unsafe partial struct LLVMTypeRef(IntPtr handle) : IEquatable<LLVMTypeRef
 {
     public IntPtr Handle = handle;
 
+#pragma warning disable CS0618 // Global-context APIs retained for compatibility.
     public static LLVMTypeRef BFloat => LLVM.BFloatType();
 
     public static LLVMTypeRef Double => LLVM.DoubleType();
@@ -38,6 +39,7 @@ public unsafe partial struct LLVMTypeRef(IntPtr handle) : IEquatable<LLVMTypeRef
     public static LLVMTypeRef X86FP80 => LLVM.X86FP80Type();
 
     public static LLVMTypeRef X86AMX => LLVM.X86AMXType();
+#pragma warning restore CS0618
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)] // Justification: causes native allocation
     public readonly LLVMValueRef AlignOf => (Handle != IntPtr.Zero) ? LLVM.AlignOf(this) : default;
@@ -147,11 +149,13 @@ public unsafe partial struct LLVMTypeRef(IntPtr handle) : IEquatable<LLVMTypeRef
 
     public static LLVMTypeRef CreateArray2(LLVMTypeRef ElementType, ulong ElementCount) => LLVM.ArrayType2(ElementType, ElementCount);
 
+#pragma warning disable CS0618 // Global-context APIs retained for compatibility.
     public static LLVMTypeRef CreateInt(uint NumBits) => LLVM.IntType(NumBits);
 
     public static LLVMTypeRef CreateIntPtr(LLVMTargetDataRef TD) => LLVM.IntPtrType(TD);
 
     public static LLVMTypeRef CreateIntPtrForAS(LLVMTargetDataRef TD, uint AS) => LLVM.IntPtrTypeForAS(TD, AS);
+#pragma warning restore CS0618
 
     public static LLVMTypeRef CreatePointer(LLVMTypeRef ElementType, uint AddressSpace) => LLVM.PointerType(ElementType, AddressSpace);
 
@@ -161,7 +165,9 @@ public unsafe partial struct LLVMTypeRef(IntPtr handle) : IEquatable<LLVMTypeRef
     {
         fixed (LLVMTypeRef* pElementTypes = ElementTypes)
         {
+#pragma warning disable CS0618 // Global-context API retained for compatibility.
             return LLVM.StructType((LLVMOpaqueType**)pElementTypes, (uint)ElementTypes.Length, Packed ? 1 : 0);
+#pragma warning restore CS0618
         }
     }
 

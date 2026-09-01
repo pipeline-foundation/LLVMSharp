@@ -1,6 +1,6 @@
 // Copyright (c) .NET Foundation and Contributors. All Rights Reserved. Licensed under the MIT License (MIT). See License.md in the repository root for more information.
 
-// Ported from https://github.com/llvm/llvm-project/tree/llvmorg-21.1.8/llvm/include/llvm-c
+// Ported from https://github.com/llvm/llvm-project/tree/llvmorg-22.1.8/llvm/include/llvm-c
 // Original source is Copyright (c) the LLVM Project and Contributors. Licensed under the Apache License v2.0 with LLVM Exceptions. See NOTICE.txt in the project root for license information.
 
 namespace LLVMSharp.Interop;
@@ -47,6 +47,7 @@ public enum LLVMOpcode
     LLVMFPTrunc = 37,
     LLVMFPExt = 38,
     LLVMPtrToInt = 39,
+    LLVMPtrToAddr = 69,
     LLVMIntToPtr = 40,
     LLVMBitCast = 41,
     LLVMAddrSpaceCast = 60,
