@@ -15,6 +15,7 @@
 #include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
 #include <llvm/Analysis/ValueTracking.h>
+#include <llvm/ExecutionEngine/JITLink/JITLinkMemoryManager.h>
 #include <llvm/ExecutionEngine/Orc/Core.h>
 #include <llvm/ExecutionEngine/Orc/Layer.h>
 #include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
@@ -36,6 +37,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Demangle/Demangle.h>
 #include <llvm/Support/CBindingWrapping.h>
+#include <llvm/Support/Error.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/TypeSize.h>
 #include <llvm/Target/TargetMachine.h>
@@ -390,7 +392,7 @@ LLVMValueRef llvmsharp_DISubrange_getCount(LLVMMetadataRef subrange)
 void llvmsharp_DISubroutineType_getTypeArray(LLVMMetadataRef subroutine_type, LLVMMetadataRef** out_buffer, int32_t* out_size)
 {
     DISubroutineType* unwrapped = unwrap<DISubroutineType>(subroutine_type);
-    DITypeRefArray array = unwrapped->getTypeArray();
+    DITypeArray array = unwrapped->getTypeArray();
     int32_t size = array.size();
 
     LLVMMetadataRef* buffer = (LLVMMetadataRef*)malloc(size * sizeof(LLVMMetadataRef));
@@ -783,7 +785,8 @@ void llvmsharp_Module_GetIdentifiedStructTypes(LLVMModuleRef module, LLVMTypeRef
 LLVMOrcObjectLayerRef llvmsharp_OrcCreateObjectLinkingLayer(LLVMOrcExecutionSessionRef execution_session)
 {
     orc::ExecutionSession* unwrapped = unwrap(execution_session);
-    orc::ObjectLinkingLayer* layer = new orc::ObjectLinkingLayer(*unwrapped);
+    std::unique_ptr<jitlink::InProcessMemoryManager> memory_manager = cantFail(jitlink::InProcessMemoryManager::Create());
+    orc::ObjectLinkingLayer* layer = new orc::ObjectLinkingLayer(*unwrapped, std::move(memory_manager));
     return wrap(static_cast<orc::ObjectLayer*>(layer));
 }
 

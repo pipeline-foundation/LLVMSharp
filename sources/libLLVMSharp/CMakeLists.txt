@@ -19,25 +19,21 @@ set(LLVM_SEARCH_PATHS
   ${PATH_TO_LLVM}/share/llvm/cmake/
 )
 
+if(MSVC)
+  find_package(zstd CONFIG REQUIRED)
+
+  if(TARGET zstd::libzstd AND NOT TARGET zstd::libzstd_static)
+    add_library(zstd::libzstd_static ALIAS zstd::libzstd)
+  endif()
+endif()
+
 find_package(Clang REQUIRED CONFIG
              PATHS ${LLVM_SEARCH_PATHS}
              NO_DEFAULT_PATH)
 
-# LLVM's Windows packages record the DIA SDK path from their build machine.
-if(MSVC AND CMAKE_GENERATOR_INSTANCE AND TARGET LLVMDebugInfoPDB)
-  if(CMAKE_GENERATOR_PLATFORM MATCHES "[Aa][Rr][Mm]64")
-    set(_llvmsharp_diaguids "${CMAKE_GENERATOR_INSTANCE}/DIA SDK/lib/arm64/diaguids.lib")
-  elseif(CMAKE_GENERATOR_PLATFORM MATCHES "[Ww]in32")
-    set(_llvmsharp_diaguids "${CMAKE_GENERATOR_INSTANCE}/DIA SDK/lib/diaguids.lib")
-  else()
-    set(_llvmsharp_diaguids "${CMAKE_GENERATOR_INSTANCE}/DIA SDK/lib/amd64/diaguids.lib")
-  endif()
-
-  get_target_property(_llvmsharp_pdb_libs LLVMDebugInfoPDB INTERFACE_LINK_LIBRARIES)
-  if(EXISTS "${_llvmsharp_diaguids}")
-    string(REGEX REPLACE "[^;]*[Dd][Ii][Aa] SDK[^;]*diaguids\\.lib" "${_llvmsharp_diaguids}" _llvmsharp_pdb_libs "${_llvmsharp_pdb_libs}")
-    set_target_properties(LLVMDebugInfoPDB PROPERTIES INTERFACE_LINK_LIBRARIES "${_llvmsharp_pdb_libs}")
-  endif()
+# libLLVMSharp does not select any DIA-backed objects from LLVM's static libraries.
+if(MSVC AND NOT TARGET DIASDK::Diaguids)
+  add_library(DIASDK::Diaguids INTERFACE IMPORTED)
 endif()
 
 # Distro static zstd libraries are not position-independent.
@@ -58,24 +54,27 @@ if(NOT LLVM_ENABLE_RTTI)
   endif()
 endif()
 
-if(WIN32)
-  target_link_libraries(LLVMSharp PRIVATE LLVM-C)
+if(APPLE)
+  target_link_libraries(LLVMSharp PRIVATE LLVM)
+else()
+  if(WIN32)
+    target_link_libraries(LLVMSharp PRIVATE LLVM-C)
+  endif()
+
+  target_link_libraries(LLVMSharp PRIVATE LLVMDemangle)
+  target_link_libraries(LLVMSharp PRIVATE LLVMAggressiveInstCombine)
+  target_link_libraries(LLVMSharp PRIVATE LLVMAnalysis)
+  target_link_libraries(LLVMSharp PRIVATE LLVMCFGuard)
+  target_link_libraries(LLVMSharp PRIVATE LLVMInstCombine)
+  target_link_libraries(LLVMSharp PRIVATE LLVMInstrumentation)
+  target_link_libraries(LLVMSharp PRIVATE LLVMipo)
+  target_link_libraries(LLVMSharp PRIVATE LLVMJITLink)
+  target_link_libraries(LLVMSharp PRIVATE LLVMObjCARCOpts)
+  target_link_libraries(LLVMSharp PRIVATE LLVMOrcJIT)
+  target_link_libraries(LLVMSharp PRIVATE LLVMScalarOpts)
+  target_link_libraries(LLVMSharp PRIVATE LLVMTransformUtils)
+  target_link_libraries(LLVMSharp PRIVATE LLVMVectorize)
 endif()
-
-target_link_libraries(LLVMSharp PRIVATE LLVMDemangle)
-
-target_link_libraries(LLVMSharp PRIVATE LLVMAggressiveInstCombine)
-target_link_libraries(LLVMSharp PRIVATE LLVMAnalysis)
-target_link_libraries(LLVMSharp PRIVATE LLVMCFGuard)
-target_link_libraries(LLVMSharp PRIVATE LLVMInstCombine)
-target_link_libraries(LLVMSharp PRIVATE LLVMInstrumentation)
-target_link_libraries(LLVMSharp PRIVATE LLVMipo)
-target_link_libraries(LLVMSharp PRIVATE LLVMJITLink)
-target_link_libraries(LLVMSharp PRIVATE LLVMObjCARCOpts)
-target_link_libraries(LLVMSharp PRIVATE LLVMOrcJIT)
-target_link_libraries(LLVMSharp PRIVATE LLVMScalarOpts)
-target_link_libraries(LLVMSharp PRIVATE LLVMTransformUtils)
-target_link_libraries(LLVMSharp PRIVATE LLVMVectorize)
 
 if(APPLE AND EXISTS "${PATH_TO_LLVM}/lib/libLTO.dylib")
   target_link_options(LLVMSharp PRIVATE "LINKER:-lto_library,${PATH_TO_LLVM}/lib/libLTO.dylib")

@@ -376,6 +376,26 @@ function DownloadLlvm {
   fi
 }
 
+function InstallMacOSLlvm {
+  brew install llvm
+  LASTEXITCODE=$?
+
+  if [ "$LASTEXITCODE" != 0 ]; then
+    return "$LASTEXITCODE"
+  fi
+
+  llvmDir="$(brew --prefix llvm)"
+  installedVersion="$("$llvmDir/bin/llvm-config" --version 2> /dev/null)"
+
+  if [[ "$installedVersion" != "$llvm" ]]; then
+    echo "Homebrew provided LLVM '$installedVersion' but '$llvm' is required"
+    LASTEXITCODE=1
+    return "$LASTEXITCODE"
+  fi
+
+  LASTEXITCODE=0
+}
+
 function LiftLibLLVM {
   runtime="$1"
   destination="$2"
@@ -414,17 +434,13 @@ function LiftLibLLVM {
       src="$(find "$downloadDir/extract" -name 'libLLVM*.so*' -type f | head -n1)"
       ;;
     osx-*)
-      brew install "llvm@${major}" || brew install llvm
-      prefix="$(brew --prefix "llvm@${major}" 2> /dev/null || brew --prefix llvm)"
-      # The 'brew install llvm' fallback (used when 'llvm@${major}' is unavailable) can
-      # pull a different major; verify it matches the tracked version before packaging.
-      installedMajor="$("$prefix/bin/llvm-config" --version 2> /dev/null | cut -d. -f1)"
-      if [[ "$installedMajor" != "$major" ]]; then
-        echo "Homebrew provided LLVM major '$installedMajor' but '$major' is required for '$runtime'"
-        LASTEXITCODE=1
+      InstallMacOSLlvm
+
+      if [ "$LASTEXITCODE" != 0 ]; then
         return "$LASTEXITCODE"
       fi
-      src="$prefix/lib/libLLVM.dylib"
+
+      src="$llvmDir/lib/libLLVM.dylib"
       ;;
     *)
       echo "'$runtime' cannot lift libLLVM here; use build.ps1 on the matching runner"
@@ -538,7 +554,11 @@ function RegenerateNative {
   if [[ "$target" == "libLLVM" ]]; then
     LiftLibLLVM "$rid" "$stagingDir"
   elif [[ "$target" == "libLLVMSharp" ]]; then
-    DownloadLlvm "$rid" "$llvmDir"
+    if [[ "$rid" == osx-* ]]; then
+      InstallMacOSLlvm
+    else
+      DownloadLlvm "$rid" "$llvmDir"
+    fi
 
     if [ "$LASTEXITCODE" != 0 ]; then
       return "$LASTEXITCODE"
