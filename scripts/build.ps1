@@ -158,9 +158,27 @@ function Build-LibLLVMSharp([string] $runtime, [string] $source, [string] $desti
   }
 
   $nativeBuildDir = Join-Path -Path $ArtifactsDir -ChildPath "bin\native\$runtime"
-  $pathToLlvm = (Resolve-Path -Path $source).Path
+  $pathToLlvm = (Resolve-Path -Path $source).Path.Replace("\", "/")
+  $cmakeArguments = @(
+    "-B", "$nativeBuildDir",
+    "-S", "$RepoRoot",
+    "-A", "$arch",
+    "-Thost=$arch",
+    "-DPATH_TO_LLVM=$pathToLlvm"
+  )
 
-  & cmake -B "$nativeBuildDir" -S "$RepoRoot" -A "$arch" "-Thost=$arch" "-DPATH_TO_LLVM=$pathToLlvm"
+  if ($env:VCPKG_INSTALLATION_ROOT) {
+    $vcpkgToolchain = (Join-Path -Path $env:VCPKG_INSTALLATION_ROOT -ChildPath "scripts\buildsystems\vcpkg.cmake").Replace("\", "/")
+    $vcpkgTriplet = switch ($runtime) {
+      "win-x64"   { "x64-windows-static" }
+      "win-arm64" { "arm64-windows-static" }
+    }
+
+    $cmakeArguments += "-DCMAKE_TOOLCHAIN_FILE=$vcpkgToolchain"
+    $cmakeArguments += "-DVCPKG_TARGET_TRIPLET=$vcpkgTriplet"
+  }
+
+  & cmake @cmakeArguments
 
   if ($LastExitCode -ne 0) {
     throw "'cmake' configure failed for '$runtime'"
