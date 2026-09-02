@@ -9,7 +9,9 @@ public unsafe partial struct LLVMContextRef(IntPtr handle) : IDisposable, IEquat
 {
     public IntPtr Handle = handle;
 
+#pragma warning disable CS0618 // Global-context API retained for compatibility.
     public static LLVMContextRef Global => LLVM.GetGlobalContext();
+#pragma warning restore CS0618
 
     public readonly LLVMTypeRef BFloatType => (Handle != IntPtr.Zero) ? LLVM.BFloatTypeInContext(this) : default;
 

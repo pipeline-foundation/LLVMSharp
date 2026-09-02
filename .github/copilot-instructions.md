@@ -67,7 +67,7 @@ these in the rsp; don't drop them expecting an external profile to supply them.
   init calls. Regenerate against a full-target LLVM build/install, or restore these six aggregator bodies to
   the canonical 20-target list afterward. The per-target `InitializeAMDGPUTarget()` etc. P/Invokes are
   hand-written in `Extensions/LLVM.Manual.cs` and already cover every target regardless.
-- **`LLVMAttributeIndex` / `LLVMJITSymbolGenericFlags` need a post-regen fixup.** Generator `21.1.8.3`
+- **`LLVMAttributeIndex` / `LLVMJITSymbolGenericFlags` need a post-regen fixup.** Generator `22.1.8.0`
   preserves the headers' `U` literal suffixes (`0U`, `1U << n`). The repo's `CA1028` policy (unsuppressed)
   requires `Int32`-underlying enums, and `int` enums reject `U`-suffixed values (CS0266) — while switching
   them to `uint` re-triggers `CA1028`. These two enums' values are version-stable, so after regen restore

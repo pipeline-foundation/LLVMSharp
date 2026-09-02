@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <PackageReference Include="libLLVM" />
+    <PackageReference Include="libLLVMSharp" />
   </ItemGroup>
 
 </Project>
