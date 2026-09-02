@@ -84,7 +84,7 @@ jobs:
         - { rid: win-arm64,   os: windows-11-arm }
         - { rid: linux-x64,   os: ubuntu-latest }
         - { rid: linux-arm64, os: ubuntu-24.04-arm }
-        - { rid: osx-arm64,   os: macos-latest }
+        - { rid: osx-arm64,   os: macos-15 }
     steps:
     - uses: actions/checkout@v4
     - name: Lift libLLVM (Windows)
@@ -138,13 +138,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - { rid: win-x64,     os: windows-latest }
-        - { rid: win-arm64,   os: windows-11-arm }
+        - { rid: win-x64,     os: windows-latest,  vcpkg: x64-windows-static }
+        - { rid: win-arm64,   os: windows-11-arm,  vcpkg: arm64-windows-static }
         - { rid: linux-x64,   os: ubuntu-latest }
         - { rid: linux-arm64, os: ubuntu-24.04-arm }
-        - { rid: osx-arm64,   os: macos-latest }
+        - { rid: osx-arm64,   os: macos-15 }
     steps:
     - uses: actions/checkout@v4
+    - name: Install LLVM dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install `
+          "zlib:${{ matrix.vcpkg }}" `
+          "zstd:${{ matrix.vcpkg }}"
     - name: Build libLLVMSharp (Windows)
       if: runner.os == 'Windows'
       shell: pwsh

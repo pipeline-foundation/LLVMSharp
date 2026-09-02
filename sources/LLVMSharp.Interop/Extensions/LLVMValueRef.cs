@@ -1357,7 +1357,9 @@ public unsafe partial struct LLVMValueRef(IntPtr handle) : IEquatable<LLVMValueR
     {
         fixed (LLVMValueRef* pConstantVals = ConstantVals)
         {
+#pragma warning disable CS0618 // Global-context API retained for compatibility.
             return LLVM.ConstStruct((LLVMOpaqueValue**)pConstantVals, (uint)ConstantVals.Length, Packed ? 1 : 0);
+#pragma warning restore CS0618
         }
     }
 
@@ -1385,7 +1387,9 @@ public unsafe partial struct LLVMValueRef(IntPtr handle) : IEquatable<LLVMValueR
     {
         fixed (LLVMValueRef* pVals = Vals)
         {
+#pragma warning disable CS0618 // Global-context API retained for compatibility.
             return LLVM.MDNode((LLVMOpaqueValue**)pVals, (uint)Vals.Length);
+#pragma warning restore CS0618
         }
     }
 
@@ -1422,7 +1426,7 @@ public unsafe partial struct LLVMValueRef(IntPtr handle) : IEquatable<LLVMValueR
     public readonly LLVMBasicBlockRef AppendBasicBlock(ReadOnlySpan<char> Name)
     {
         using var marshaledName = new MarshaledString(Name);
-        return LLVM.AppendBasicBlock(this, marshaledName);
+        return LLVM.AppendBasicBlockInContext(GlobalParent.Context, this, marshaledName);
     }
 
     public readonly void AppendExistingBasicBlock(LLVMBasicBlockRef BB) => LLVM.AppendExistingBasicBlock(this, BB);
@@ -1785,6 +1789,8 @@ public unsafe partial struct LLVMValueRef(IntPtr handle) : IEquatable<LLVMValueR
 
     public readonly LLVMBasicBlockRef GetSuccessor(uint i) => LLVM.GetSuccessor(this, i);
 
+    public readonly LLVMValueRef GetSwitchCaseValue(uint i) => LLVM.GetSwitchCaseValue(this, i);
+
     public readonly void GlobalClearMetadata() => LLVM.GlobalClearMetadata(this);
 
     public readonly (uint Kind, LLVMMetadataRef Metadata)[] GlobalCopyAllMetadata()
@@ -1860,6 +1866,8 @@ public unsafe partial struct LLVMValueRef(IntPtr handle) : IEquatable<LLVMValueR
     public readonly void SetParamAlignment(uint align) => LLVM.SetParamAlignment(this, align);
 
     public readonly void SetSuccessor(uint i, LLVMBasicBlockRef block) => LLVM.SetSuccessor(this, i, block);
+
+    public readonly void SetSwitchCaseValue(uint i, LLVMValueRef CaseValue) => LLVM.SetSwitchCaseValue(this, i, CaseValue);
 
     public readonly void SetValueName2(string Name) => SetValueName2(Name.AsSpan());
 

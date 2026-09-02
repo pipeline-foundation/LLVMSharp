@@ -77,7 +77,7 @@ public unsafe partial struct LLVMBasicBlockRef(IntPtr handle) : IEquatable<LLVMB
     public readonly LLVMBasicBlockRef InsertBasicBlock(ReadOnlySpan<char> Name)
     {
         using var marshaledName = new MarshaledString(Name);
-        return LLVM.InsertBasicBlock(this, marshaledName);
+        return LLVM.InsertBasicBlockInContext(Parent.GlobalParent.Context, this, marshaledName);
     }
 
     public readonly void MoveAfter(LLVMBasicBlockRef MovePos) => LLVM.MoveBasicBlockAfter(this, MovePos);

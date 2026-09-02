@@ -21,11 +21,9 @@ public static unsafe class LlvmSupport
             return;
         }
 
-        LLVM.InitializeAllTargetInfos();
-        LLVM.InitializeAllTargets();
-        LLVM.InitializeAllTargetMCs();
-        LLVM.InitializeAllAsmPrinters();
-        LLVM.InitializeAllAsmParsers();
+        _ = LLVM.InitializeNativeTarget();
+        _ = LLVM.InitializeNativeAsmPrinter();
+        _ = LLVM.InitializeNativeAsmParser();
 
         s_targetsInitialized = true;
     }
