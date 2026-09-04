@@ -20,6 +20,20 @@ public sealed class StructType : CompositeType
         return context.GetOrCreate<StructType>(handle);
     }
 
+    public static StructType Get(LLVMContext context, Type[] elementTypes, bool packed = false)
+    {
+        ArgumentNullException.ThrowIfNull(elementTypes);
+        return Get(context, elementTypes.AsSpan(), packed);
+    }
+
+    public static StructType Get(LLVMContext context, ReadOnlySpan<Type> elementTypes, bool packed)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        var handles = Type.GetHandles(elementTypes, context, nameof(elementTypes));
+        var handle = context.Handle.GetStructType(handles, packed);
+        return context.GetOrCreate<StructType>(handle);
+    }
+
     public bool IsOpaque => Handle.IsOpaqueStruct;
 
     public bool IsPacked => Handle.IsPackedStruct;
@@ -58,15 +72,7 @@ public sealed class StructType : CompositeType
 
     public void SetBody(ReadOnlySpan<Type> elementTypes, bool packed)
     {
-        var handles = new LLVMTypeRef[elementTypes.Length];
-
-        for (var i = 0; i < handles.Length; i++)
-        {
-            var elementType = elementTypes[i];
-            ArgumentNullException.ThrowIfNull(elementType);
-            handles[i] = elementType.Handle;
-        }
-
+        var handles = Type.GetHandles(elementTypes, Context, nameof(elementTypes));
         Handle.StructSetBody(handles, packed);
     }
 }

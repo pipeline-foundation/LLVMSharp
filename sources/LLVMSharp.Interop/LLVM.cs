@@ -15,7 +15,7 @@ public static unsafe partial class LLVM
 {
     public static event DllImportResolver? ResolveLibrary;
 
-    public const int MajorVersion = 21;
+    public const int MajorVersion = 22;
     public const int MinorVersion = 1;
 
     static LLVM()
@@ -34,14 +34,14 @@ public static unsafe partial class LLVM
             return nativeLibrary;
         }
 
-        // Then try the normal resolution of the library
-        if (TryResolve(libraryName, assembly, searchPath.GetValueOrDefault(), out nativeLibrary))
+        // Then try library specific resolution as applicable
+        if (libraryName.Equals("libLLVM", StringComparison.Ordinal) && TryResolveLLVM(assembly, searchPath, out nativeLibrary))
         {
             return nativeLibrary;
         }
 
-        // Finally, do library specific resolution as applicable
-        if (libraryName.Equals("libLLVM", StringComparison.Ordinal) && TryResolveLLVM(assembly, searchPath, out nativeLibrary))
+        // Finally, try the normal resolution of the library
+        if (TryResolve(libraryName, assembly, searchPath.GetValueOrDefault(), out nativeLibrary))
         {
             return nativeLibrary;
         }

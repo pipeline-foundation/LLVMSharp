@@ -1,5 +1,7 @@
 // Copyright (c) .NET Foundation and Contributors. All Rights Reserved. Licensed under the MIT License (MIT). See License.md in the repository root for more information.
 
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using LLVMSharp.Interop;
 
 namespace Kaleidoscope;
@@ -20,8 +22,11 @@ public sealed unsafe class KaleidoscopeJit : IDisposable
     {
         LlvmSupport.EnsureTargetsInitialized();
 
+        LLVMOrcOpaqueLLJITBuilder* builder = LLVM.OrcCreateLLJITBuilder();
+        LLVM.OrcLLJITBuilderSetObjectLinkingLayerCreator(builder, &CreateObjectLinkingLayer, null);
+
         LLVMOrcOpaqueLLJIT* jit;
-        LlvmSupport.ThrowIfError(LLVM.OrcCreateLLJIT(&jit, null), "Failed to create LLJIT");
+        LlvmSupport.ThrowIfError(LLVM.OrcCreateLLJIT(&jit, builder), "Failed to create LLJIT");
         _jit = jit;
 
         _mainJD = LLVM.OrcLLJITGetMainJITDylib(jit);
@@ -117,6 +122,10 @@ public sealed unsafe class KaleidoscopeJit : IDisposable
         LLVM.OrcDisposeThreadSafeContext(threadSafeContext);
         return threadSafeModule;
     }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static LLVMOrcOpaqueObjectLayer* CreateObjectLinkingLayer(void* context, LLVMOrcOpaqueExecutionSession* executionSession, sbyte* triple)
+        => LLVM.OrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManagerReserveAlloc(executionSession, ReserveAlloc: 1);
 
     public void Dispose()
     {
