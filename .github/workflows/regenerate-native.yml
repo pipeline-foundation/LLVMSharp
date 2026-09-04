@@ -141,7 +141,7 @@ jobs:
         - { rid: win-x64,     os: windows-latest,  vcpkg: x64-windows-static }
         - { rid: win-arm64,   os: windows-11-arm,  vcpkg: arm64-windows-static }
         - { rid: linux-x64,   os: ubuntu-latest }
-        - { rid: linux-arm64, os: ubuntu-24.04-arm }
+        - { rid: linux-arm64, os: ubuntu-22.04-arm }
         - { rid: osx-arm64,   os: macos-15 }
     steps:
     - uses: actions/checkout@v4

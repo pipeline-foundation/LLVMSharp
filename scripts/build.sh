@@ -377,7 +377,18 @@ function DownloadLlvm {
 }
 
 function InstallMacOSLlvm {
-  brew install llvm
+  brew update
+  LASTEXITCODE=$?
+
+  if [ "$LASTEXITCODE" != 0 ]; then
+    return "$LASTEXITCODE"
+  fi
+
+  if brew list --versions llvm > /dev/null; then
+    brew upgrade llvm
+  else
+    brew install llvm
+  fi
   LASTEXITCODE=$?
 
   if [ "$LASTEXITCODE" != 0 ]; then
